@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     const submitBtn = document.querySelector('button[type=submit]');
     let currentIndex = localStorage.getItem('currentIndex') || 0;
-    let hiddenfield = document.querySelector('#hidden');
     patients[currentIndex].classList.add('highlight');
     nextBtn.addEventListener('click', () => {
       if (patients.length !== 0 && currentIndex < patients.length - 1) {
@@ -15,9 +14,9 @@ document.addEventListener('DOMContentLoaded', () => {
         currentPatient.classList.remove('highlight');
         currentIndex++;
         patients[currentIndex].classList.add('highlight');
-        hiddenfield.value = patients[currentIndex].cells[3].innerHTML
         localStorage.setItem('currentIndex', currentIndex);
-        socket.send('nextClicked');
+        const msg = patients[currentIndex].cells[3].innerHTML;
+        socket.send(msg);
       }
     });
   });

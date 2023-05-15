@@ -1,11 +1,20 @@
 const express = require('express');
-const createWebSocketServer = require('./config/socket');
 const http = require('http');
+const WebSocket = require('ws');
 let token = 102;
 let currentToken = 'T-101';
 const app = express();
-const server = http.createServer(app,  { port: 8080 });
-createWebSocketServer(server);
+const server = http.createServer();
+const wss = new WebSocket.Server({ server });
+wss.on('connection', (ws) => {
+  ws.on('message', (message) => {
+    const rec_msg = message.toString('utf8');
+    currentToken = rec_msg;
+    wss.clients.forEach((client) => {
+        client.send(rec_msg);
+    });
+  });
+});
 const path = require('path');
 require('dotenv').config();
 const {pool, connectToDatabase} = require('./config/connection');
@@ -44,9 +53,12 @@ app.post('/token-dashboard',async (req, res) =>{
 app.get('/current-token', (req, res)=>{
   res.render('client', {currentToken});
 })
-app.post('/token-dashboard/next', (req,res) =>{
-  currentToken = req.body.currentToken;
-  res.redirect('/token-dashboard');
-});
+// app.post('/token-dashboard/next', (req,res) =>{
+//   currentToken = req.body.currentToken;
+//   res.redirect('/token-dashboard');
+// });
 const port = 3000
+server.listen(8080, () => {
+  console.log('WebSocket server is running on port 8080');
+})
 app.listen(port,console.log(`Server is running at http://localhost:${port}`));
